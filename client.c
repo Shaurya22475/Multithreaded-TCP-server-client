@@ -62,7 +62,7 @@ void *client_thread(void *arg){
         error("ERROR reading from socket");
     }
 
-    printf("Server reply to thread %ld: %s\n", pthread_self(), buffer);
+    printf("Server reply to thread %ld:\n%s\n", pthread_self(), buffer);
 
     close(sockfd);
     return NULL;
