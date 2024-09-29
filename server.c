@@ -95,24 +95,49 @@ void *handle_client(void *newsockfd_ptr) {
     char buffer[256]; 
     bzero(buffer, 256);
     
-    struct Process top[2];  
-    calculating_top_two_process(top);  
-    
-    char response[1024];
-    
-    snprintf(response, sizeof(response),"Top 1: PID=%d, Name=%s, Total Time=%llu\n""Top 2: PID=%d, Name=%s, Total Time=%llu\n",top[0].pid, top[0].name, top[0].total_time,top[1].pid, top[1].name, top[1].total_time);
-    
-    
-    int n = read(newsockfd, buffer, 255);
+    // Upon connection we inform the client about the protocol to get top two cpu-consuming process info.
+    char protocol_info[] = "Send 'GET /TOP2' to retrieve the top two processes.\n";
+    int n = write(newsockfd, protocol_info, strlen(protocol_info));
+    if (n < 0) {
+        error("ERROR writing protocol info to socket");
+    }
+
+    n = read(newsockfd, buffer, 255);
     if (n < 0) {
         error("ERROR reading from socket");
     }
-
+    
     printf("Here is the message: %s\n", buffer);
 
-    n = write(newsockfd, response, strlen(response));
-    if (n < 0) {
-        error("ERROR writing to socket");
+    bzero(buffer, 255);
+    n = read(newsockfd, buffer, 255);
+    printf("Request : %s\n", buffer);
+    printf("%d\n",strcmp(buffer, "GET /TOP2"));
+    if (n < 0){
+        error("ERROR reading from the socket");
+    }
+    
+    if (strcmp(buffer,"GET /TOP2") == 0){
+        struct Process top[2];  
+        calculating_top_two_process(top);  
+        
+        char response[1024];
+        
+        snprintf(response, sizeof(response),"Top 1: PID=%d, Name=%s, Total Time=%llu\n""Top 2: PID=%d, Name=%s, Total Time=%llu\n",top[0].pid, top[0].name, top[0].total_time,top[1].pid, top[1].name, top[1].total_time);
+
+        printf("Sending response !!\n");
+        n = write(newsockfd, response, strlen(response));
+        if (n < 0) {
+            error("ERROR writing to socket");
+        }
+
+    }
+    else{
+        char error_msg[] = "Invalid request. Use 'GET /TOP2'.\n";
+        n = write(newsockfd, error_msg, strlen(error_msg));
+        if (n < 0) {
+            error("ERROR writing to socket");
+        }
     }
     
     

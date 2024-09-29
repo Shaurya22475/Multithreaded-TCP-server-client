@@ -64,6 +64,21 @@ void *client_thread(void *arg){
 
     printf("Server reply to thread %ld:\n%s\n", pthread_self(), buffer);
 
+    bzero(buffer, 255);
+    snprintf(buffer, 255, "GET /TOP2");
+    n = write(sockfd, buffer, strlen(buffer));
+    if (n < 0){
+        error("ERROR connecting");
+    }
+
+    bzero(buffer, 255);
+    n = read(sockfd, buffer, 255);
+    if (n < 0){
+        error("ERROR reading from socket");
+    }
+
+    printf("Server Response :: %s\n", buffer);
+
     close(sockfd);
     return NULL;
 
