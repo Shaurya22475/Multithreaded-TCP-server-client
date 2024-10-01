@@ -68,7 +68,7 @@ void calculating_top_two_process(struct Process top[2])
                 {
                     top[1] = top[0]; 
                     top[0] = current_proc; 
-                } 
+                }   
                 else if (current_proc.total_time > top[1].total_time) 
                 {
                     top[1] = current_proc; 
